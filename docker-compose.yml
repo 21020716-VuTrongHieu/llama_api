@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    # image: demo-1
+    mem_swappiness: 100
+    privileged: true
+    ports:
+      - "5001:5000"
+    volumes:
+      - .:/app
+      # - ./llama_model:/app/llama_model
+    environment:
+      DATABASE_URL: postgresql://vu_hieu:vu_hieu@db:5432/llama_api_dev
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672/
+      BOTCAKE_SECRET: 4j5iSAORv0vhb0W9eCcvDi47xdDXfD7i63_8B3eoaAdKsau6TUuWBZCdRrodduPr
+    env_file: .dev.env
+    links:
+        - rabbitmq
+        - db
+    networks:
+      shared_network:
+        aliases:
+          - llama-host
+      default:
+        aliases:
+          - llama-host
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: vu_hieu
+      POSTGRES_PASSWORD: vu_hieu
+      POSTGRES_DB: llama_api_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - shared_network
+      - default
+  rabbitmq:
+    platform: linux/amd64
+    image: rabbitmq:3.8.14-management
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: m1
+    ports:
+      - 5671:5672
+      - 15671:15672
+    networks:
+      - shared_network
+      - default
+volumes:
+  postgres_data:
+    driver: local
+  llama_model:
+    driver: local
+networks:
+  shared_network:
+    external:
+      name: pancake_network
+
