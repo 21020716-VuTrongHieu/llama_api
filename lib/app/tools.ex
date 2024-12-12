@@ -47,7 +47,7 @@ defmodule LlamaApi.Tools do
 
   def enqueue_task_run(task) do
     random = :rand.uniform(3) + 3
-    queue = "wait_min_0#{random}"
+    queue = "wait_min_04"
     enqueue(queue, task)
   end
 
