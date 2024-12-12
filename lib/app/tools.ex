@@ -46,7 +46,7 @@ defmodule LlamaApi.Tools do
   end
 
   def enqueue_task_run(task) do
-    queue = "wait_sec_03"
+    queue = "wait_min_05"
     enqueue(queue, task)
   end
 

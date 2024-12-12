@@ -56,9 +56,9 @@ defmodule LlamaApi.Worker.ProcessRunWorker do
         # {:ok, _} = GenServer.call(LlamaWorker, {:generate_text, prompt}, :infinity)
 
         task = Task.async(fn -> 
-          if false do
-            GenServer.call(LlamaWorker, {:generate_text, prompt, %{top_p: top_p, temperature: temperature, max_new_tokens: max_new_tokens}}, :infinity)
-          else
+          # if false do
+          #   GenServer.call(LlamaWorker, {:generate_text, prompt, %{top_p: top_p, temperature: temperature, max_new_tokens: max_new_tokens}}, :infinity)
+          # else
             last_additional_messages = last_conversation
 
             IO.inspect(last_additional_messages, label: "last_additional_messages")
@@ -69,10 +69,10 @@ defmodule LlamaApi.Worker.ProcessRunWorker do
               nil
             end
             IO.inspect(last_content, label: "last_content")
-            response = call_open_ai(prompt, last_content, top_p, temperature, max_new_tokens)
+            response = call_modal_ai(prompt, last_content, top_p, temperature, max_new_tokens)
             IO.inspect(response, label: "response")
             response
-          end
+          # end
         end)
 
         result = case Task.yield(task, 30_000) || Task.shutdown(task) do
@@ -191,8 +191,7 @@ defmodule LlamaApi.Worker.ProcessRunWorker do
     end
   end
 
-  defp call_open_ai(prompt, request, top_p, temperature, max_completion_tokens) do
-    Logger.info("Call open ai")
+  defp call_modal_ai(prompt, request, top_p, temperature, max_completion_tokens) do
     token = System.get_env("OPENAI_API_KEY")
     assistant_id = System.get_env("ASSISTANT_ID")
     headers_assistants = [{"authorization", "Bearer #{token}"}, {"OpenAI-Beta", "assistants=v2"}]
@@ -215,7 +214,6 @@ defmodule LlamaApi.Worker.ProcessRunWorker do
     }
 
     http_create_answer = Tools.http_post_openai_stream("https://api.openai.com/v1/threads/runs", body_create_answer, "Không thể thực hiện POST", headers_assistants)
-    IO.inspect(http_create_answer, label: "http_create_answer")
     case http_create_answer do
       {:ok, %{success: true, data: response_data}} ->
         content = response_data["content"]
